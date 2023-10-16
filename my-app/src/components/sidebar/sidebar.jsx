@@ -42,7 +42,7 @@ export function Sidebar({ isLoading }) {
     navigate('/login')
   }
 
-  const validToken = JSON.parse(localStorage.getItem('token'))
+  const validToken = localStorage.getItem('token')
   const userName = validToken?.username
 
   return (
