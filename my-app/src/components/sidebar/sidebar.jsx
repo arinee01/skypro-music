@@ -43,7 +43,7 @@ export function Sidebar({ isLoading }) {
   }
 
   const validToken = JSON.parse(localStorage.getItem('token'))
-  const userName = validToken.username
+  const userName = validToken?.username
 
   return (
     <S.MainSidebar>
