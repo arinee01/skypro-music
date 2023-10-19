@@ -6,21 +6,23 @@ import { useRef, useState } from 'react'
 import ProgressBar from './progress-bar'
 import { useSelector, useDispatch } from 'react-redux'
 import {
-  currentTrackPlayer,
-  currentIsPlaying,
-  currentTracklistPlayer,
-} from '../../store/selectors/currentTrack'
-import {
-  selectCurrentTrack,
+  currentTrackSelector,
   selectIsPlaying,
-} from '../../store/actions/creators/currentTrack'
+  currentPlaylistSelector,
+  allTracksSelector,
+} from '../../store/selectors/selectors'
+import {
+  setCurrentTrack,
+  setIsPlaying,
+} from '../../store/slices/trackSlice'
 import { userContext } from '../../context/userContext'
 
 export function Bar({ isLoading }) {
-  const track = useSelector(currentTrackPlayer)
-  const isPlaying = useSelector(currentIsPlaying)
-  const dispatch = useDispatch(selectIsPlaying)
+  const track = useSelector(currentTrackSelector)
+  const isPlaying = useSelector(selectIsPlaying)
+  const dispatch = useDispatch(setIsPlaying)
 
+  const currentPlaylist = useSelector(currentPlaylistSelector)
 
   const [isLoop, setIsLoop] = useState(false)
 
@@ -64,47 +66,49 @@ export function Bar({ isLoading }) {
 
   const handleStart = () => {
     if (localStorage.getItem('token', token)) {
-      dispatch(selectIsPlaying(true))
+      dispatch(setIsPlaying(true))
       audioRef.current?.play()
     }
   }
 
   useEffect(handleStart, [track])
 
-  const tracklist = useSelector(currentTracklistPlayer)
-
+  // const tracklist = useSelector(allTracksSelector)
+  const tracklist = useSelector(currentPlaylistSelector)
+  
   const handleShuffle = () => {
     let randomIndex = Math.floor(Math.random() * (tracklist.length - 1))
     return randomIndex
   }
 
-  const trackIndex = tracklist.indexOf(track)
   const handleNextTrack = () => {
+    const trackIndex = tracklist.findIndex(el => el.id === track.id)
     if (track) {
-      if (trackIndex < tracklist.length - 1 && !shuffle) {
+      if (trackIndex < tracklist.length - 1 && !shuffle) { //
         const nextTrack = tracklist[trackIndex + 1]
-        dispatch(selectCurrentTrack(nextTrack))
+        dispatch(setCurrentTrack(nextTrack))
       }
 
       if (shuffle) {
         let randomTrackIndex = handleShuffle()
         let randomTrack = tracklist[randomTrackIndex]
-        dispatch(selectCurrentTrack(randomTrack))
+        dispatch(setCurrentTrack(randomTrack))
       }
     }
   }
 
   const endTrack = () => {
+    const trackIndex = tracklist.findIndex(el => el.id === track.id)
     if (!isLoop) {
       handleNextTrack()
     }
     if (trackIndex === tracklist.length - 1) {
-        dispatch(selectIsPlaying(false))
+        dispatch(setIsPlaying(false))
       }
   }
 
   return (
-    track.id && (
+     track.id && (
       <S.Bar>
         <div
           className="musicTimerDiv"

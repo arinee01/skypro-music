@@ -3,17 +3,20 @@ import { ContentTitlePlaylist } from '../../components/content-title-playlist/co
 import { Playlist } from '../../components/playlist/playlist'
 import * as S from '../main/layout.styles'
 import { userContext } from '../../context/userContext'
-import { selectCurrentTrack, selectIsPlaying } from '../../store/actions/creators/currentTrack'
+import { setCurrentTrack, setIsPlaying, setCurrentPlaylist } from '../../store/slices/trackSlice'
 import { useDispatch } from 'react-redux'
-import { PlaylistItem } from '../../components/playlist/playlist-item'
 import { useGetFavouriteTracksQuery } from '../../services/playlists'
-import { ContentPlaylist } from '../../components/playlist/playlist.styles'
 
-export const FavouritesPage = ({ isLoading, error }) => {
-  const {token, setToken} = useContext(userContext)
+export const FavouritesPage = ({ isLoading }) => {
+  const { token, setToken } = useContext(userContext)
   const dispatch = useDispatch()
 
-  const { data } = useGetFavouriteTracksQuery()
+  const { data, error } = useGetFavouriteTracksQuery()
+
+  useEffect(() => {
+    dispatch(setCurrentPlaylist(data))
+    console.log(data)
+  }, [data])
 
   if (localStorage.getItem('token', token)) {
     return (
@@ -21,34 +24,19 @@ export const FavouritesPage = ({ isLoading, error }) => {
         <S.CenterblockH2>Мои Треки</S.CenterblockH2>
         <S.CenterblockContent>
           <ContentTitlePlaylist isLoading={isLoading} />
-
-          <ContentPlaylist className="playlist">
-            <div className="content__playlist-items">
-              {
-                data?.map((track) => (
-                  <PlaylistItem
-                    track={track}
-                    key={track.id}
-                    title={track.name}
-                    link={track.track_file}
-                    author={track.author}
-                    authorLink={track.authorLink}
-                    album={track.album}
-                    albumLink={track.albumLink}
-                    time={track.duration_in_seconds}
-                  />
-                ))
-              }
-            </div>
-          </ContentPlaylist>
+          {error ? (
+            <p>Не удалось заргузить плейлист: {error.error}</p>
+          ) : (
+            <Playlist tracks={data} />
+          )}
         </S.CenterblockContent>
       </div>
     )
   } else {
     useEffect(() => {
       setToken(false)
-      dispatch(selectCurrentTrack({}))
-      dispatch(selectIsPlaying(false))
+      dispatch(setCurrentTrack({}))
+      dispatch(setIsPlaying(false))
     }, [])
   }
 }

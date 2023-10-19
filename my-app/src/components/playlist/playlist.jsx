@@ -4,12 +4,12 @@ import * as S from './playlist.styles'
 
 import { PlaylistItem } from './playlist-item'
 
-import { useSelector } from 'react-redux'
-import { currentTracklistPlayer } from '../../store/selectors/currentTrack'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectIsLoading } from '../../store/selectors/selectors'
+import { useGetAllTracksQuery } from '../../services/playlists'
 
-export const Playlist = ({ isLoading, error }) => {
-  //TODO: один компонент для всех плейлистов
-  const tracklist = useSelector(currentTracklistPlayer)
+export const Playlist = ({ tracks }) => {
+  const { isFetching } = useGetAllTracksQuery()
 
   const secondsToMinutes = (sec) => {
     const min = Math.trunc(sec / 60) + ''
@@ -17,21 +17,13 @@ export const Playlist = ({ isLoading, error }) => {
     return min.padStart(2, 0) + ':' + sec.padStart(2, 0)
   }
 
-  //TODO: обработка ошибок проблемы с отображением верстки
-  if (error) {
-    return (
-      <p style={{ 'font-size': '24px' }}>
-        Произошла ошибка, попробуйте позже: {error}
-      </p>
-    )
-  }
   return (
     <S.ContentPlaylist className="playlist">
       <div className="content__playlist-items">
-        {isLoading ? (
+        {isFetching ? (
           <SkeletonPlaylistItems />
         ) : (
-          tracklist?.map((track) => (
+          tracks?.map((track) => (
             <PlaylistItem
               track={track}
               key={track.id}

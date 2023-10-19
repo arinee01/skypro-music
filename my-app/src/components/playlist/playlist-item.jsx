@@ -3,19 +3,20 @@ import * as S from './playlist.styles'
 
 import { useDispatch, useSelector } from 'react-redux'
 import {
-  currentIsPlaying,
-  currentTrackPlayer,
-} from '../../store/selectors/currentTrack'
-import { selectCurrentTrack } from '../../store/actions/creators/currentTrack'
+  selectIsPlaying,
+  currentPlaylistSelector,
+  currentTrackSelector,
+} from '../../store/selectors/selectors'
+import { setCurrentTrack } from '../../store/slices/trackSlice'
 
-export const PlaylistItem = ({ title, titleSpan, link, author, album, time, track, authorLink, albumLink }) => {
+export const PlaylistItem = ({ track, album, author, link, title, albumLink, authorLink, titleSpan, time }) => {
   const dispatch = useDispatch()
 
-  const isPlaying = useSelector(currentIsPlaying)
-  const currentTrack = useSelector(currentTrackPlayer)
+  const isPlaying = useSelector(selectIsPlaying)
+  const currentTrack  = useSelector(currentTrackSelector)
 
   const showPlayer = (track) => {
-    dispatch(selectCurrentTrack(track))
+    dispatch(setCurrentTrack(track))
   }
 
   // const secondsToMinutes = (sec) => {
