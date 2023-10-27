@@ -3,22 +3,44 @@ import { ContentTitlePlaylist } from '../../components/content-title-playlist/co
 import { Playlist } from '../../components/playlist/playlist'
 import * as S from '../main/layout.styles'
 import { userContext } from '../../context/userContext'
-import { setCurrentTrack, setIsPlaying, setCurrentPlaylist, setIsLoading } from '../../store/slices/trackSlice'
-import { useDispatch } from 'react-redux'
+import {
+  setCurrentTrack,
+  setIsPlaying,
+  setCurrentPlaylist,
+  setIsLoading,
+} from '../../store/slices/trackSlice'
+import { useDispatch, useSelector } from 'react-redux'
 import { useGetFavouriteTracksQuery } from '../../services/playlists'
+import { useNavigate } from 'react-router-dom'
+import {
+  currentPlaylistSelector,
+  favouritePlaylistSelector,
+} from '../../store/selectors/selectors'
 
 export const FavouritesPage = ({ isLoading }) => {
   const { token, setToken } = useContext(userContext)
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  // const tracklist = useSelector(currentPlaylistSelector)
+  // console.log(tracklist)
 
   const { data, error } = useGetFavouriteTracksQuery()
-  console.log(data)
 
+  useEffect(() => {
+    if (error) {
+      localStorage.removeItem('token')
+      setToken(false)
+      navigate('/login')
+    }
+  }, [error])
 
   useEffect(() => {
     dispatch(setCurrentPlaylist(data))
     dispatch(setIsLoading(false))
   }, [data])
+
+
 
   if (localStorage.getItem('token', token)) {
     return (
@@ -42,3 +64,4 @@ export const FavouritesPage = ({ isLoading }) => {
     }, [])
   }
 }
+
